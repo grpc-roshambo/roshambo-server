@@ -1,5 +1,6 @@
 package com.grpcroshambo.roshamboserver.entity;
 
+import com.grpcroshambo.roshambo.Choice;
 import lombok.Getter;
 import lombok.Setter;
 

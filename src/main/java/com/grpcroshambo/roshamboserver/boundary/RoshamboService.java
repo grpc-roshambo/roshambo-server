@@ -1,31 +1,36 @@
 package com.grpcroshambo.roshamboserver.boundary;
 
+import com.grpcroshambo.roshambo.Choice;
+import com.grpcroshambo.roshambo.Result;
+import com.grpcroshambo.roshambo.RoshamboServiceGrpc;
 import com.grpcroshambo.roshamboserver.entity.*;
+import net.devh.boot.grpc.server.service.GrpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Streamable;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.UUID;
 
-@Component
-public class RoshamboService {
+@GrpcService
+public class RoshamboService extends RoshamboServiceGrpc.RoshamboServiceImplBase {
     private static final Logger logger = LoggerFactory.getLogger(RoshamboService.class.getName());
-//    private static final int[][] resultTable = {
-//            {
-//                    Result.TIE_VALUE, Result.LOSE_VALUE, Result.LOSE_VALUE, Result.LOSE_VALUE
-//            },
-//            {
-//                    Result.WIN_VALUE, Result.TIE_VALUE, Result.LOSE_VALUE, Result.WIN_VALUE
-//            },
-//            {
-//                    Result.WIN_VALUE, Result.WIN_VALUE, Result.TIE_VALUE, Result.LOSE_VALUE
-//            },
-//            {
-//                    Result.WIN_VALUE, Result.LOSE_VALUE, Result.WIN_VALUE, Result.TIE_VALUE
-//            }
-//    };
+    private static final int[][] resultTable = {
+            {
+                    Result.TIE_VALUE, Result.LOSE_VALUE, Result.LOSE_VALUE, Result.LOSE_VALUE
+            },
+            {
+                    Result.WIN_VALUE, Result.TIE_VALUE, Result.LOSE_VALUE, Result.WIN_VALUE
+            },
+            {
+                    Result.WIN_VALUE, Result.WIN_VALUE, Result.TIE_VALUE, Result.LOSE_VALUE
+            },
+            {
+                    Result.WIN_VALUE, Result.LOSE_VALUE, Result.WIN_VALUE, Result.TIE_VALUE
+            }
+    };
 
     private final PlayerRepository playerRepository;
     private final MatchRepository matchRepository;
@@ -108,7 +113,7 @@ public class RoshamboService {
     }
 
     private void informFirstPlayer(MatchChoice matchChoicePlayer1, MatchChoice matchChoicePlayer2) {
-        // final var result = Result.forNumber(resultTable[matchChoicePlayer1.getChoice().getNumber()][matchChoicePlayer2.getChoice().getNumber()]);
+        final var result = Result.forNumber(resultTable[matchChoicePlayer1.getChoice().getNumber()][matchChoicePlayer2.getChoice().getNumber()]);
         // TODO: Calculate MatchResult send to player1
     }
 }

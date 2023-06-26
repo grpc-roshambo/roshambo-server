@@ -1,18 +1,20 @@
 package com.grpcroshambo.roshamboserver.boundary;
 
-import com.grpcroshambo.roshambo.Choice;
-import com.grpcroshambo.roshambo.Result;
-import com.grpcroshambo.roshambo.RoshamboServiceGrpc;
+import com.google.protobuf.Any;
+import com.google.rpc.Code;
+import com.google.rpc.ErrorInfo;
+import com.grpcroshambo.roshambo.*;
+import com.grpcroshambo.roshamboserver.entity.MatchChoice;
 import com.grpcroshambo.roshamboserver.entity.*;
+import io.grpc.protobuf.StatusProto;
+import io.grpc.stub.StreamObserver;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.util.Streamable;
 import org.springframework.scheduling.annotation.Scheduled;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.UUID;
+import java.util.*;
 
 @GrpcService
 public class RoshamboService extends RoshamboServiceGrpc.RoshamboServiceImplBase {
@@ -32,6 +34,7 @@ public class RoshamboService extends RoshamboServiceGrpc.RoshamboServiceImplBase
             }
     };
 
+    final HashMap<Long, StreamObserver<MatchRequestsFromServer>> playerObservers = new HashMap<>();
     private final PlayerRepository playerRepository;
     private final MatchRepository matchRepository;
     private final MatchChoiceRepository matchChoiceRepository;
@@ -40,6 +43,41 @@ public class RoshamboService extends RoshamboServiceGrpc.RoshamboServiceImplBase
         this.playerRepository = playerRepository;
         this.matchRepository = matchRepository;
         this.matchChoiceRepository = matchChoiceRepository;
+    }
+
+
+    @Override
+    public void join(JoinRequest joinRequest, StreamObserver<MatchRequestsFromServer> responseObserver) {
+        final var name = joinRequest.getName();
+        logger.info("join - {} wants to join", name);
+        Optional<Player> existingPlayer = playerRepository.findByName(name);
+        if (existingPlayer.isPresent() && existingPlayer.get().getActive()) {
+            logger.error("join - {} already joined", name);
+            com.google.rpc.Status status = com.google.rpc.Status.newBuilder()
+                    .setCode(Code.ALREADY_EXISTS.getNumber())
+                    .setMessage("Name already exists")
+                    .addDetails(Any.pack(ErrorInfo.newBuilder()
+                            .setReason("Invalid Name")
+                            .setDomain("com.devilopa.roshambo.roshamboserver")
+                            .build()))
+                    .build();
+            responseObserver.onError(StatusProto.toStatusRuntimeException(status));
+            return;
+        }
+        Player player = existingPlayer.orElseGet(() -> {
+            Player newPlayer = new Player();
+            newPlayer.setName(name);
+            return newPlayer;
+        });
+        player.setActive(true);
+        playerRepository.save(player);
+        logger.info("join - {} put in game", name);
+        playerObservers.put(player.getId(), responseObserver);
+    }
+
+    @Override
+    public void play(com.grpcroshambo.roshambo.MatchChoice request, StreamObserver<MatchResult> responseObserver) {
+        super.play(request, responseObserver);
     }
 
     @Scheduled(cron = "0/10 * * * * *")

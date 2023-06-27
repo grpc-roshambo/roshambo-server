@@ -34,7 +34,7 @@ public class RoshamboService extends RoshamboServiceGrpc.RoshamboServiceImplBase
             }
     };
 
-    final HashMap<Long, StreamObserver<MatchRequestsFromServer>> playerObservers = new HashMap<>();
+    final HashMap<Long, StreamObserver<MatchRequestFromServer>> playerObservers = new HashMap<>();
     final HashMap<String, StreamObserver<MatchResult>> matchObservers = new HashMap<>();
     private final PlayerRepository playerRepository;
     private final MatchRepository matchRepository;
@@ -47,7 +47,7 @@ public class RoshamboService extends RoshamboServiceGrpc.RoshamboServiceImplBase
     }
 
     @Override
-    public void join(JoinRequest joinRequest, StreamObserver<MatchRequestsFromServer> responseObserver) {
+    public void join(JoinRequest joinRequest, StreamObserver<MatchRequestFromServer> responseObserver) {
         final var name = joinRequest.getName();
         logger.info("join - {} wants to join", name);
         Optional<Player> existingPlayer = playerRepository.findByName(name);
@@ -155,7 +155,7 @@ public class RoshamboService extends RoshamboServiceGrpc.RoshamboServiceImplBase
         matchChoiceRepository.save(matchChoice);
         match.getMatchChoices().add(matchChoice);
 
-        final var player1MatchRequest = MatchRequestsFromServer.newBuilder()
+        final var player1MatchRequest = MatchRequestFromServer.newBuilder()
                 .setMatchToken(matchChoice.getId())
                 .setOpponentName(opponent.getName())
                 .setOpponentLastChoice(Choice.ROCK)

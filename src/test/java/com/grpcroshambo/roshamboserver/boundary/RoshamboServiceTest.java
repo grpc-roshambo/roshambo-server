@@ -2,7 +2,7 @@ package com.grpcroshambo.roshamboserver.boundary;
 
 import com.google.rpc.Code;
 import com.grpcroshambo.roshambo.JoinRequest;
-import com.grpcroshambo.roshambo.MatchRequestsFromServer;
+import com.grpcroshambo.roshambo.MatchRequestFromServer;
 import com.grpcroshambo.roshambo.RoshamboServiceGrpc;
 import com.grpcroshambo.roshamboserver.entity.MatchChoiceRepository;
 import com.grpcroshambo.roshamboserver.entity.MatchRepository;
@@ -42,7 +42,7 @@ class RoshamboServiceTest {
         var exceptionThrown = new AtomicBoolean(false);
         nonBlockingStub.join(JoinRequest.newBuilder().setName("Smith").build(), new StreamObserver<>() {
             @Override
-            public void onNext(MatchRequestsFromServer matchRequestsFromServer) {
+            public void onNext(MatchRequestFromServer matchRequestFromServer) {
             }
 
             @Override
@@ -70,7 +70,7 @@ class RoshamboServiceTest {
         var alreadyExistsExceptionThrown = new AtomicBoolean(false);
         nonBlockingStub.join(JoinRequest.newBuilder().setName("Smith").build(), new StreamObserver<>() {
             @Override
-            public void onNext(MatchRequestsFromServer matchRequestsFromServer) {
+            public void onNext(MatchRequestFromServer matchRequestFromServer) {
 
             }
 
